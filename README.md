@@ -2,6 +2,14 @@
 
 七牛云命令行工具。提供一些常用命令，方便和其他命令行工具结合实现更多功能。
 
+## 安装
+
+使用 `go install` 命令快速安装最新版本。
+
+```bash
+go install github.com/nnnewb/qn@latest
+```
+
 ## 例子
 
 ```
