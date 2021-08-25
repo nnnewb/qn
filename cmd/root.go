@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"io/ioutil"
 	"os"
 	"path"
 
@@ -82,16 +83,26 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	err := viper.ReadInConfig()
-	cobra.CheckErr(err)
-
-	if viper.GetString("ak") == "" || viper.GetString("sk") == "" {
-		println("必须在 ~/.qnrc.yml 中先设置 ak/sk/bucket")
+	if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
-		viper.Set("ak", "must-be-set")
-		viper.Set("sk", "muse-be-set")
-		viper.Set("bucket", "must-be-set")
-		err = viper.WriteConfigAs(path.Join(home, ".qnrc.yml"))
+		// 如果不存在配置文件则创建
+		err = ioutil.WriteFile(path.Join(home, ".qnrc.yml"), []byte("ak: \"\"\nsk: \"\"\nbucket: \"\""), 0644)
 		cobra.CheckErr(err)
+		err = viper.ReadInConfig()
+		cobra.CheckErr(err)
+	} else {
+		cobra.CheckErr(err)
+	}
+
+	if viper.GetString("ak") == "" || viper.GetString("sk") == "" || viper.GetString("bucket") == "" {
+		println("请先设置 ak/sk/bucket")
+		println("")
+		println("   例: qn config --set ak=<access key>")
+		println("   例: qn config --set sk=<secret key>")
+		println("   例: qn config --set bucket=<bucket>")
+		println("")
+		println("点击打开七牛云密钥管理页面： https://portal.qiniu.com/user/key")
+		os.Exit(1)
 	}
 }
