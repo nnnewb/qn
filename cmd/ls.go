@@ -43,8 +43,19 @@ var lsCmd = &cobra.Command{
 		mgr := storage.NewBucketManager(credential, &storage.Config{UseCdnDomains: false})
 		bucket := viper.GetString("bucket")
 
-		ch, err := mgr.ListBucket(bucket, args[0], "", "")
+		delimiter, err := cmd.Flags().GetString("delimiter")
 		cobra.CheckErr(err)
+
+		noDelimiter, err := cmd.Flags().GetBool("no-delimiter")
+		cobra.CheckErr(err)
+
+		if noDelimiter {
+			delimiter = ""
+		}
+
+		ch, err := mgr.ListBucket(bucket, args[0], delimiter, "")
+		cobra.CheckErr(err)
+
 		for v := range ch {
 			fmt.Printf("%s  %10s   %s\n", time.UnixMicro(v.Item.PutTime/10).Format(time.RFC3339), utils.ByteCountIEC(v.Item.Fsize), v.Item.Key)
 		}
@@ -62,5 +73,6 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// lsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	lsCmd.Flags().BoolP("no-delimiter", "", false, "不使用任何路径分隔符，ls命令会递归显示所有文件。")
+	lsCmd.Flags().StringP("delimiter", "d", "/", "指定路径分隔符，ls命令会以unix-like的方式工作。")
 }
