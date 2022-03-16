@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"path"
+	"path/filepath"
 
 	"github.com/nnnewb/qn/internal/utils"
 	"github.com/qiniu/go-sdk/v7/auth"
@@ -42,9 +43,9 @@ var putCmd = &cobra.Command{
 		dest, err := cmd.Flags().GetString("dest")
 		cobra.CheckErr(err)
 
-		for _, filepath := range args {
-			key := path.Join(dest, path.Base(filepath))
-			err = utils.Upload(viper.GetString("bucket"), key, filepath, credential)
+		for _, filename := range args {
+			key := path.Join(dest, filepath.Base(filename))
+			err = utils.Upload(viper.GetString("bucket"), key, filename, credential)
 			cobra.CheckErr(err)
 		}
 	},
