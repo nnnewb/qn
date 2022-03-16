@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/cheggaaa/pb/v3"
@@ -35,34 +34,35 @@ func Upload(cmd *cobra.Command, bucket, key, path string, credential *auth.Crede
 		return errors.Wrap(err, "check upload file stat fail")
 	}
 
-	mutex := sync.Mutex{}
 	partsize, err := cmd.Flags().GetInt64("partsize")
 	if err != nil {
 		return err
 	}
 
-	total := info.Size()
+	// https://developer.qiniu.com/kodo/1238/go#resume-upload-file
+	// 服务端SDK中默认块大小为4MB，支持根据条件设置块大小
+	// （要求除最后一块外，其他块大于等于1MB，小于等于1G），
+	// 块与块之间可以并发上传，以提高上传效率。
+	if partsize < 1024*1024*1024 || partsize >= 1024*1024*1024*1024 {
+		return fmt.Errorf("分片大小 %d 必须大于等于 1MiB, 小于 1GiB", partsize)
+	}
+
 	progress := pb.
-		New64(total).
+		New64(info.Size()).
 		SetRefreshRate(time.Second).
 		SetWidth(79).
 		Set(pb.Bytes, true).
 		Start()
-	err = uploader.Put(context.Background(), &ret, token, key, file, total, &storage.RputV2Extra{
+	err = uploader.Put(context.Background(), &ret, token, key, file, info.Size(), &storage.RputV2Extra{
 		PartSize: partsize,
 		Notify: func(partNumber int64, ret *storage.UploadPartsRet) {
-			mutex.Lock()
-			defer mutex.Unlock()
-			if total-partsize < 0 {
-				progress.Add64(total)
+			if progress.Current()+partsize > info.Size() {
+				progress.Add64(info.Size() - progress.Current())
 			} else {
 				progress.Add64(partsize)
 			}
-			total -= partsize
 		},
 		NotifyErr: func(partNumber int64, err error) {
-			mutex.Lock()
-			defer mutex.Unlock()
 			progress.SetErr(err)
 		},
 	})
