@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/nnnewb/qn/internal/utils"
@@ -55,11 +56,24 @@ var lsCmd = &cobra.Command{
 			delimiter = ""
 		}
 
-		ch, err := mgr.ListBucket(bucket, args[0], delimiter, "")
-		cobra.CheckErr(err)
+		prefix := strings.TrimPrefix(args[0], delimiter)
 
-		for v := range ch {
-			fmt.Printf("%s  %10s   %s\n", time.UnixMicro(v.Item.PutTime/10).Format(time.RFC3339), utils.ByteCountIEC(v.Item.Fsize), v.Item.Key)
+		var (
+			items   []storage.ListItem
+			hasNext = true
+			marker  string
+			dirs    []string
+		)
+		for hasNext {
+			items, dirs, marker, hasNext, err = mgr.ListFiles(bucket, prefix, delimiter, marker, 100)
+			cobra.CheckErr(err)
+			for _, dir := range dirs {
+				fmt.Printf("目录 %19s  %10s   %s\n", "*", "0 B", dir)
+			}
+
+			for _, item := range items {
+				fmt.Printf("文件 %s  %10s   %s\n", time.UnixMicro(item.PutTime/10).Format("2006-01-02 15:04:05"), utils.ByteCountIEC(item.Fsize), item.Key)
+			}
 		}
 	},
 }
