@@ -38,6 +38,8 @@ var cpCmd = &cobra.Command{
 	Long:  `复制文件`,
 	Args:  cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
+		cobra.CheckErr(checkConfig())
+
 		credential := auth.New(viper.GetString("ak"), viper.GetString("sk"))
 		mgr := storage.NewBucketManager(credential, &storage.Config{UseCdnDomains: false})
 		bucket := viper.GetString("bucket")

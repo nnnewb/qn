@@ -35,6 +35,8 @@ var rmCmd = &cobra.Command{
 	Long:  `删除文件`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		cobra.CheckErr(checkConfig())
+
 		credential := auth.New(viper.GetString("ak"), viper.GetString("sk"))
 		mgr := storage.NewBucketManager(credential, &storage.Config{UseCdnDomains: false})
 		bucket := viper.GetString("bucket")

@@ -95,14 +95,4 @@ func initConfig() {
 		cobra.CheckErr(err)
 	}
 
-	if viper.GetString("ak") == "" || viper.GetString("sk") == "" || viper.GetString("bucket") == "" {
-		println("请先设置 ak/sk/bucket")
-		println("")
-		println("   例: qn config --set ak=<access key>")
-		println("   例: qn config --set sk=<secret key>")
-		println("   例: qn config --set bucket=<bucket>")
-		println("")
-		println("点击打开七牛云密钥管理页面： https://portal.qiniu.com/user/key")
-		os.Exit(1)
-	}
 }

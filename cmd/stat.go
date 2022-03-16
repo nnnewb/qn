@@ -38,6 +38,8 @@ var statCmd = &cobra.Command{
 	Long:  `获取存储文件状态`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		cobra.CheckErr(checkConfig())
+
 		credential := auth.New(viper.GetString("ak"), viper.GetString("sk"))
 		mgr := storage.NewBucketManager(credential, &storage.Config{UseCdnDomains: false})
 		for _, key := range args {

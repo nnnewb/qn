@@ -39,6 +39,8 @@ var lsCmd = &cobra.Command{
 	Long:  `列出文件`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		cobra.CheckErr(checkConfig())
+
 		credential := auth.New(viper.GetString("ak"), viper.GetString("sk"))
 		mgr := storage.NewBucketManager(credential, &storage.Config{UseCdnDomains: false})
 		bucket := viper.GetString("bucket")

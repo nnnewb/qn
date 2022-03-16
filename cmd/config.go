@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -92,4 +93,20 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// configCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func checkConfig() error {
+	if viper.GetString("ak") == "" {
+		return errors.New("配置项 `ak` 必须有值")
+	}
+
+	if viper.GetString("sk") == "" {
+		return errors.New("配置项 `sk` 必须有值")
+	}
+
+	if viper.GetString("bucket") == "" {
+		return errors.New("配置项 `bucket` 必须有值")
+	}
+
+	return nil
 }

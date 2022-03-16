@@ -39,6 +39,8 @@ var getCmd = &cobra.Command{
 	Long:  "下载指定的文件到本地",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		cobra.CheckErr(checkConfig())
+
 		credential := auth.New(viper.GetString("ak"), viper.GetString("sk"))
 		mgr := storage.NewBucketManager(credential, &storage.Config{UseCdnDomains: false})
 

@@ -36,6 +36,8 @@ var putCmd = &cobra.Command{
 	Short: "上传文件到七牛云",
 	Long:  "上传文件到七牛云",
 	Run: func(cmd *cobra.Command, args []string) {
+		cobra.CheckErr(checkConfig())
+
 		credential := auth.New(viper.GetString("ak"), viper.GetString("sk"))
 		dest, err := cmd.Flags().GetString("dest")
 		cobra.CheckErr(err)
