@@ -45,7 +45,7 @@ var putCmd = &cobra.Command{
 
 		for _, filename := range args {
 			key := path.Join(dest, filepath.Base(filename))
-			err = utils.Upload(viper.GetString("bucket"), key, filename, credential)
+			err = utils.Upload(cmd, viper.GetString("bucket"), key, filename, credential)
 			cobra.CheckErr(err)
 		}
 	},
@@ -58,9 +58,9 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	putCmd.Flags().StringP("dest", "d", "", "上传位置, 最终key会拼接成 <dest>/filename 的形式")
-	putCmd.Flags().Int64P("partsize", "p", 1024*1024, "分片大小, 分片会并发上传")
+
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// putCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	putCmd.Flags().StringP("dest", "d", "", "上传位置, 最终key会拼接成 <dest>/filename 的形式")
+	putCmd.Flags().Int64P("partsize", "p", 1024*1024, "分片大小, 分片会并发上传")
 }

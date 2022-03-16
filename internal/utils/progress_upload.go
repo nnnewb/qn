@@ -11,10 +11,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/qiniu/go-sdk/v7/auth"
 	"github.com/qiniu/go-sdk/v7/storage"
-	"github.com/spf13/viper"
+	"github.com/spf13/cobra"
 )
 
-func Upload(bucket, key, path string, credential *auth.Credentials) error {
+func Upload(cmd *cobra.Command, bucket, key, path string, credential *auth.Credentials) error {
 	ret := storage.PutRet{}
 	policy := storage.PutPolicy{
 		Scope:   fmt.Sprintf("%s:%s", bucket, key),
@@ -36,7 +36,11 @@ func Upload(bucket, key, path string, credential *auth.Credentials) error {
 	}
 
 	mutex := sync.Mutex{}
-	partsize := viper.GetInt64("partsize")
+	partsize, err := cmd.Flags().GetInt64("partsize")
+	if err != nil {
+		return err
+	}
+
 	total := info.Size()
 	progress := pb.
 		New64(total).
