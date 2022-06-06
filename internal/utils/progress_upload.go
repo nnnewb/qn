@@ -43,7 +43,7 @@ func Upload(cmd *cobra.Command, bucket, key, path string, credential *auth.Crede
 	// 服务端SDK中默认块大小为4MB，支持根据条件设置块大小
 	// （要求除最后一块外，其他块大于等于1MB，小于等于1G），
 	// 块与块之间可以并发上传，以提高上传效率。
-	if partsize < 1024*1024*1024 || partsize >= 1024*1024*1024*1024 {
+	if partsize < 1024*1024 || partsize >= 1024*1024*1024 {
 		return fmt.Errorf("分片大小 %d 必须大于等于 1MiB, 小于 1GiB", partsize)
 	}
 
